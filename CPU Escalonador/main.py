@@ -11,6 +11,9 @@ class VM():
         self.et = et # estimetated time
         self.at = at # arrival time
         self.priority = priority
+
+    def __repr__(self) -> str:
+        return f'VM{self.id}'
         
 ## CPU deve ter no max 4 
 class CPU():
@@ -26,8 +29,14 @@ class CPU():
         self.vm_list = vm_list
 
     # sobre lista https://stackoverflow.com/questions/522372/finding-first-and-last-index-of-some-value-in-a-list-in-python
+    # count() pode ser demorado, testar futuramente a differença com 'from collections import Counter' 
     def alocarTarefa(self, vm):
         # print("a")
+        if self.lista_tarefa.count(0) == 0:
+            self.lista_cheia = True
+        else:
+            self.lista_cheia = False
+
         if not self.lista_cheia:
             # print("b")
 
@@ -45,22 +54,25 @@ class CPU():
                 for i in range(first_pos, last_pos):
                     # print(i)
                     self.lista_tarefa[i] = vm.id
-                    
+
             cpu.info()
         else:
             print("Lista cheia")
 
-
-        # count() pode ser demorado, testar futuramente a differença com 'from collections import Counter'            
-        if self.lista_tarefa.count(0) == 0:
-            self.lista_cheia = True
+    def removerTarefa(self, vm):
+        for i in range(len(self.lista_tarefa)):
+            if vm.id == self.lista_tarefa[i]:
+                self.lista_tarefa[i] = 0
+        # print(self.vm_list)
+        self.vm_list.remove(vm)
+        cpu.info()
     
     def info(self):
         print(self.lista_tarefa)
         
-         #print("tempo: " + tempo_ini)
+         #print("tempo: " + tempo)
     
-tempo_ini = 0 # primeira tarefa em 20 min
+tempo = 0 # primeira tarefa em 20 min
 tempo_max = 0 # tempo max first fit = 170 minutos aumentar de 5min em 5 min por ciclo
 vm_list = []
 
@@ -68,7 +80,7 @@ vm_list = []
 cpu = CPU(1, Status.OCIOSO.value)
 
 #Lista de VM's n
-vm1 = VM(1, 2, 35, 40, 3)
+vm1 = VM(1, 4, 35, 40, 3)
 vm2 = VM(2, 2, 40, 45, 1)
 vm3 = VM(3, 4, 30, 45, 1)
 vm4 = VM(4, 4, 25, 20, 3)
@@ -86,17 +98,22 @@ cpu.receberLista(vm_list)
 cpu.info()
 cpu.alocarTarefa(vm1)
 cpu.alocarTarefa(vm2)
+cpu.removerTarefa(vm1)
+cpu.removerTarefa(vm2)
 cpu.alocarTarefa(vm3)
 # cpu.info()
     
 # while len(cpu.vm_list) > 0:
-while tempo_ini < 200:
-    for vm in vm_list:
-        if vm.at == tempo_ini:
-            print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo_ini))
-        if vm.at < tempo_ini and (vm.et + vm.at) == tempo_ini:
-            print("Saiu vm " + str(vm.id) + " no tempo " + str(tempo_ini))
+while tempo < 100:
+    for vm in cpu.vm_list:
+        if vm.at == tempo:
+            cpu.alocarTarefa(vm)
+            print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
+        if vm.at < tempo and (vm.et + vm.at) == tempo:
+            cpu.removerTarefa(vm)
+            print("Saiu vm " + str(vm.id) + " no tempo " + str(tempo))
 
         # cpu.alocarTarefa(vm)
-        
-    tempo_ini += 5
+    
+    print(cpu.vm_list)
+    tempo += 5
