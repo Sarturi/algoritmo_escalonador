@@ -55,7 +55,7 @@ class CPU():
                     # print(i)
                     self.lista_tarefa[i] = vm.id
 
-            cpu.info()
+            # cpu.info()
         else:
             print("Lista cheia")
 
@@ -65,7 +65,7 @@ class CPU():
                 self.lista_tarefa[i] = 0
         # print(self.vm_list)
         self.vm_list.remove(vm)
-        cpu.info()
+        # cpu.info()
     
     def info(self):
         print(self.lista_tarefa)
@@ -74,7 +74,10 @@ class CPU():
     
 tempo = 0 # primeira tarefa em 20 min
 tempo_max = 0 # tempo max first fit = 170 minutos aumentar de 5min em 5 min por ciclo
+ciclo = 0
+cont = 0
 vm_list = []
+vm_running_list = []
 
 # def main():
 cpu = CPU(1, Status.OCIOSO.value)
@@ -96,24 +99,44 @@ vm_list.extend([vm1, vm2, vm3, vm4, vm5, vm6, vm7, vm8, vm9, vm10])
 cpu.receberLista(vm_list)
     
 cpu.info()
-cpu.alocarTarefa(vm1)
-cpu.alocarTarefa(vm2)
-cpu.removerTarefa(vm1)
-cpu.removerTarefa(vm2)
-cpu.alocarTarefa(vm3)
+# cpu.alocarTarefa(vm1)
+# cpu.alocarTarefa(vm2)
+# cpu.removerTarefa(vm1)
+# cpu.removerTarefa(vm2)
+# cpu.alocarTarefa(vm3)
 # cpu.info()
     
 # while len(cpu.vm_list) > 0:
-while tempo < 100:
-    for vm in cpu.vm_list:
+while len(cpu.vm_list) > 0 and tempo < 100: #tempo < 100:
+    print(" ")
+    print("===  ===  ===  ")
+    print("Ciclo: " + str(ciclo))
+
+    if cont == 10:
+        cont = 0
+        vm = cpu.vm_list[cont]
+    else:
+        vm = cpu.vm_list[cont]
+        cont += 1
+        
+    # for vm in cpu.vm_list:
+    if not cpu.lista_cheia:
         if vm.at == tempo:
             cpu.alocarTarefa(vm)
+            vm_running_list.append(vm)
             print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
-        if vm.at < tempo and (vm.et + vm.at) == tempo:
-            cpu.removerTarefa(vm)
-            print("Saiu vm " + str(vm.id) + " no tempo " + str(tempo))
-
-        # cpu.alocarTarefa(vm)
+    if len(vm_running_list) > 0:
+        for vmr in vm_running_list:
+            if vmr.at < tempo and (vmr.et + vmr.at) == tempo:
+                cpu.removerTarefa(vmr)
+                vm_running_list.remove(vmr)
+                print("Saiu vm " + str(vmr.id) + " no tempo " + str(tempo))
+    # if vm.at < tempo and (vm.et + vm.at) == tempo:
+    #     cpu.removerTarefa(vm)
+    #     print("Saiu vm " + str(vm.id) + " no tempo " + str(tempo))
+    # cpu.alocarTarefa(vm)
     
-    print(cpu.vm_list)
+    # print(cpu.vm_list)
+    cpu.info()
     tempo += 5
+    ciclo += 1
