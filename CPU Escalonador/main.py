@@ -45,6 +45,10 @@ class CPU():
 
             if vm.vCPU <= spaces:  
                 # print("c")
+
+                # Vai dar errado nesta situação:
+                # [1, 2, 2, 1] -> [0, 2, 2, 0]
+                # pois irá sobrescrever o 2. tem q arrumar
                 first_pos = self.lista_tarefa.index(0)
                 last_pos = first_pos + vm.vCPU
 
@@ -53,8 +57,13 @@ class CPU():
 
                 for i in range(first_pos, last_pos):
                     # print(i)
-                    self.lista_tarefa[i] = vm.id
+                    if self.lista_tarefa[i] == 0:
+                        self.lista_tarefa[i] = vm.id
 
+            if self.lista_tarefa.count(0) == 0:
+                self.lista_cheia = True
+            else:
+                self.lista_cheia = False
             # cpu.info()
         else:
             print("Lista cheia")
@@ -75,9 +84,11 @@ class CPU():
 tempo = 0 # primeira tarefa em 20 min
 tempo_max = 0 # tempo max first fit = 170 minutos aumentar de 5min em 5 min por ciclo
 ciclo = 0
+rodada = 0
 cont = 0
 vm_list = []
 vm_running_list = []
+vm_pending_list = []
 
 # def main():
 cpu = CPU(1, Status.OCIOSO.value)
@@ -98,7 +109,7 @@ vm10 = VM(10, 1, 35, 30, 30)
 vm_list.extend([vm1, vm2, vm3, vm4, vm5, vm6, vm7, vm8, vm9, vm10])
 cpu.receberLista(vm_list)
     
-cpu.info()
+# cpu.info()
 # cpu.alocarTarefa(vm1)
 # cpu.alocarTarefa(vm2)
 # cpu.removerTarefa(vm1)
@@ -107,36 +118,91 @@ cpu.info()
 # cpu.info()
     
 # while len(cpu.vm_list) > 0:
-while len(cpu.vm_list) > 0 and tempo < 100: #tempo < 100:
+# while len(cpu.vm_list) > 0 and tempo < 5: #tempo < 100:
+while rodada < 12:
     print(" ")
     print("===  ===  ===  ")
     print("Ciclo: " + str(ciclo))
 
-    if cont == 10:
-        cont = 0
+    # while rodada < 5:
+    # futuramente, comparar tempo estimado caso tempo de chegada e prioridade sejam iguais
+    while cont < len(cpu.vm_list):
         vm = cpu.vm_list[cont]
-    else:
-        vm = cpu.vm_list[cont]
-        cont += 1
+        # print(vm_pending_list)
         
-    # for vm in cpu.vm_list:
-    if not cpu.lista_cheia:
+        # print("antes ", cpu.lista_cheia)
+            # print("depois ", cpu.lista_cheia)
+        if len(vm_pending_list) > 0:
+            for i, vm in enumerate(vm_pending_list):
+                if not cpu.lista_cheia:
+                    cpu.alocarTarefa(vm)
+                    vm_running_list.append(vm)
+                    vm_pending_list.pop(i)
+                    print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
+
+
         if vm.at == tempo:
-            cpu.alocarTarefa(vm)
-            vm_running_list.append(vm)
-            print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
+            if not cpu.lista_cheia:
+                # problema: a verificação de espaço só ocorre dentro do alocarTarefa,
+                # então se tiver 1 espaço mas precisa de 2 não vai alocar, mas vai fazer o resto aqui
+                cpu.alocarTarefa(vm)
+                vm_running_list.append(vm)
+                print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
+            else:
+                vm_pending_list.append(vm)
+       
+            
+        # print(cpu.vm_list[cont])
+        # print(vm_running_list)
+        cont += 1
+    cont = 0
+
     if len(vm_running_list) > 0:
         for vmr in vm_running_list:
             if vmr.at < tempo and (vmr.et + vmr.at) == tempo:
                 cpu.removerTarefa(vmr)
                 vm_running_list.remove(vmr)
                 print("Saiu vm " + str(vmr.id) + " no tempo " + str(tempo))
-    # if vm.at < tempo and (vm.et + vm.at) == tempo:
-    #     cpu.removerTarefa(vm)
-    #     print("Saiu vm " + str(vm.id) + " no tempo " + str(tempo))
-    # cpu.alocarTarefa(vm)
+
     
-    # print(cpu.vm_list)
+
     cpu.info()
     tempo += 5
     ciclo += 1
+    print("Rodada: " + str(rodada))
+    # for vm in vm_running_list:
+    # print(vm_running_list)
+    rodada += 1
+
+
+    # for vm in cpu.vm_list:
+        # print(vm)
+    
+    # if cont == 10:
+    #     cont = 0
+    #     vm = cpu.vm_list[cont]
+    # else:
+    #     vm = cpu.vm_list[cont]
+    #     cont += 1
+        
+    # # for vm in cpu.vm_list:
+    # if not cpu.lista_cheia:
+    #     if vm.at == tempo:
+    #         cpu.alocarTarefa(vm)
+    #         vm_running_list.append(vm)
+    #         print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
+    # if len(vm_running_list) > 0:
+    #     for vmr in vm_running_list:
+    #         if vmr.at < tempo and (vmr.et + vmr.at) == tempo:
+    #             cpu.removerTarefa(vmr)
+    #             vm_running_list.remove(vmr)
+    #             print("Saiu vm " + str(vmr.id) + " no tempo " + str(tempo))
+    # # if vm.at < tempo and (vm.et + vm.at) == tempo:
+    # #     cpu.removerTarefa(vm)
+    # #     print("Saiu vm " + str(vm.id) + " no tempo " + str(tempo))
+    # # cpu.alocarTarefa(vm)
+    
+    # print(cpu.vm_list)
+    # cpu.info()
+    # tempo += 5
+    # ciclo += 1
