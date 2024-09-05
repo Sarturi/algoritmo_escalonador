@@ -100,6 +100,7 @@ cont = 0
 vm_running_list = []
 vm_pending_list = []
 list_espera = []
+list_ordenada = []
 
 # def main():
 cpu = CPU(1, Status.OCIOSO.value)
@@ -108,13 +109,13 @@ cpu = CPU(1, Status.OCIOSO.value)
 vm1 = VM(1, 4, 35, 40, 3)
 vm2 = VM(2, 2, 40, 45, 1)
 vm3 = VM(3, 4, 30, 45, 1)
-vm4 = VM(4, 4, 25, 20, 3)
-vm5 = VM(5, 2, 40, 25, 3)
-vm6 = VM(6, 4, 20, 20, 2)
-vm7 = VM(7, 1, 20, 40, 0)
+vm4 = VM(4, 4, 25, 20, 3) ##
+vm5 = VM(5, 2, 40, 25, 3)##
+vm6 = VM(6, 4, 20, 20, 2) ##
+vm7 = VM(7, 1, 20, 40, 0)##
 vm8 = VM(8, 4, 20, 30, 1)
-vm9 = VM(9, 4 , 10, 20, 2)
-vm10 = VM(10, 1, 35, 30, 3)
+vm9 = VM(9, 4 , 10, 20, 2) ##
+vm10 = VM(10, 1, 35, 30, 3)##
 
 # vm_list.append(vm1).append(vm2).append(vm3).append(vm4).append(vm5).append(vm6).append(vm7).append(vm8).append(vm9).append(vm10)
 vm_list = [vm1, vm2, vm3, vm4, vm5, vm6, vm7, vm8, vm9, vm10]
@@ -128,14 +129,14 @@ cpu.receberLista(vm_list)
 # cpu.alocarTarefa(vm3)
 # cpu.info()
     
-# while len(cpu.vm_list) > 0:
+while len(cpu.vm_list) > 0:
 # while tempo < 300:
-while rodada < 1:
+# while rodada < 30:
     print(" ")
     print("===  ===  ===  ")
     print("Ciclo: ", ciclo, ", ", tempo, "min.")
     
-    tempo = 20
+    # tempo = 20
     while cont < len(cpu.vm_list):
         vm = cpu.vm_list[cont]
         # print(vm)
@@ -150,7 +151,7 @@ while rodada < 1:
     list_menor = []
     
     for i in list_espera:
-        print(i, i.priority, i.et)
+        print(i, i.priority, i.et, i.at)
         
     while len(list_espera) > 0:
         for i, vm in enumerate(list_espera):
@@ -168,21 +169,17 @@ while rodada < 1:
         list_menor.append(menor)
         list_espera.remove(menor)
 
-        
+    
     # print("menor:", menor, menor.priority)
-    print(list_menor)
-    # while rodada < 5:
-    # futuramente, comparar tempo estimado caso tempo de chegada e prioridade sejam iguais
-    while cont < len(cpu.vm_list):
-        pass
-        vm = cpu.vm_list[cont]
-        # print(vm)
-        # print(cpu.vm_list)
-        # print(vm_pending_list)
-        
-        
-        # print("antes ", cpu.lista_cheia)
-            # print("depois ", cpu.lista_cheia)
+    print("Lista espera:", list_menor)
+    list_ordenada.extend(list_menor)
+    print("Lista ordenada:", list_ordenada)
+    # print("Lista pending:", vm_pending_list)
+    list_menor = []
+
+    while cont < len(list_ordenada):
+        vm = list_ordenada[cont]
+
         if len(vm_pending_list) > 0:
             # como verifica todas uma por uma, pode quebrar a order quando a lista estiver ordenada em piroridade e outros
             for i, vmp in enumerate(vm_pending_list):
@@ -190,28 +187,75 @@ while rodada < 1:
                     vmp.et += tempo
                     cpu.alocarTarefa(vmp)
                     vm_running_list.append(vmp)
-                    vm_pending_list.pop(i)
+
+                    vm_pending_list.remove(vmp)
+                    # print(vmp)
+                    if vmp in list_ordenada:
+                        list_ordenada.remove(vmp)
                     print("Entrou vm " + str(vmp.id) + " no tempo " + str(tempo))
 
-        if vm.at == tempo:
-            list_espera.append(vm)
+        if cpu.verificarEspaço(vm):
+            vm.et += tempo
+            cpu.alocarTarefa(vm)
+            vm_running_list.append(vm)
 
-            if cpu.verificarEspaço(vm):
-                # problema: a verificação de espaço só ocorre dentro do alocarTarefa,
-                # então se tiver 1 espaço mas precisa de 2 não vai alocar, mas vai fazer o resto aqui
-                vm.et += tempo
-                cpu.alocarTarefa(vm)
-                vm_running_list.append(vm)
-                print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
-            else:
-                if not vm in vm_pending_list:
-                    vm_pending_list.append(vm)
+            list_ordenada.remove(vm)
+            print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
+        else:
+            # print("vm na pending:", vm)
+            # print(list_ordenada)
+            if not vm in vm_pending_list:
+                vm_pending_list.append(vm)
        
             
         # print(cpu.vm_list[cont])
         # print(vm_running_list)
         cont += 1
     cont = 0
+
+
+    
+    # while rodada < 5:
+    # futuramente, comparar tempo estimado caso tempo de chegada e prioridade sejam iguais
+    # while cont < len(cpu.vm_list):
+    #     pass
+    #     vm = cpu.vm_list[cont]
+    #     # print(vm)
+    #     # print(cpu.vm_list)
+    #     # print(vm_pending_list)
+        
+        
+    #     # print("antes ", cpu.lista_cheia)
+    #         # print("depois ", cpu.lista_cheia)
+    #     if len(vm_pending_list) > 0:
+    #         # como verifica todas uma por uma, pode quebrar a order quando a lista estiver ordenada em piroridade e outros
+    #         for i, vmp in enumerate(vm_pending_list):
+    #             if cpu.verificarEspaço(vmp):
+    #                 vmp.et += tempo
+    #                 cpu.alocarTarefa(vmp)
+    #                 vm_running_list.append(vmp)
+    #                 vm_pending_list.pop(i)
+    #                 print("Entrou vm " + str(vmp.id) + " no tempo " + str(tempo))
+
+    #     if vm.at == tempo:
+    #         list_espera.append(vm)
+
+    #         if cpu.verificarEspaço(vm):
+    #             # problema: a verificação de espaço só ocorre dentro do alocarTarefa,
+    #             # então se tiver 1 espaço mas precisa de 2 não vai alocar, mas vai fazer o resto aqui
+    #             vm.et += tempo
+    #             cpu.alocarTarefa(vm)
+    #             vm_running_list.append(vm)
+    #             print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
+    #         else:
+    #             if not vm in vm_pending_list:
+    #                 vm_pending_list.append(vm)
+       
+            
+    #     # print(cpu.vm_list[cont])
+    #     # print(vm_running_list)
+    #     cont += 1
+    # cont = 0
 
     # menor = 0
     
@@ -242,6 +286,16 @@ while rodada < 1:
     # for vm in vm_running_list:
     # print(vm_running_list)
     rodada += 1
+
+
+
+
+
+
+
+
+
+
 
 
     # for vm in cpu.vm_list:
