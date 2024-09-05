@@ -54,9 +54,9 @@ class CPU():
             if vm.vCPU <= spaces:  
                 # print("c")
 
-                # Vai dar errado nesta situação:
-                # [1, 2, 2, 1] -> [0, 2, 2, 0]
-                # pois irá sobrescrever o 2. tem q arrumar
+                # Pode dar errado nesta situação:
+                # [1, 2, 2, 3] -> [0, 2, 2, 0]
+                # pois irá sobrescrever o 2. talvez o if abaixo resolva
                 first_pos = self.lista_tarefa.index(0)
                 last_pos = first_pos + vm.vCPU
 
@@ -65,6 +65,7 @@ class CPU():
 
                 for i in range(first_pos, last_pos):
                     # print(i)
+                    # este if
                     if self.lista_tarefa[i] == 0:
                         self.lista_tarefa[i] = vm.id
 
@@ -134,9 +135,20 @@ while len(cpu.vm_list) > 0:
 # while rodada < 30:
     print(" ")
     print("===  ===  ===  ")
-    print("Ciclo: ", ciclo, ", ", tempo, "min.")
+    print("Ciclo:", ciclo, "|", tempo, "min.")
+
+
+    if len(vm_running_list) > 0:
+        for vmr in vm_running_list:
+            # !!!!! erro: tem que considerar o tempo atual também, por isso não funciona
+            if vmr.at < tempo and (vmr.et) == tempo:  #+ vmr.at
+                cpu.removerTarefa(vmr)
+                vm_running_list.remove(vmr)
+                print("Saiu vm " + str(vmr.id) + " no tempo " + str(tempo))
+    # print(cpu.lista_cheia)
     
     # tempo = 20
+    # Pega todas as vms que entram no tempo atual
     while cont < len(cpu.vm_list):
         vm = cpu.vm_list[cont]
         # print(vm)
@@ -150,18 +162,18 @@ while len(cpu.vm_list) > 0:
     menor = 0
     list_menor = []
     
-    for i in list_espera:
-        print(i, i.priority, i.et, i.at)
+    # for i in list_espera:
+    #     print(i, i.priority, i.et, i.at)
         
+    # ordena as vms do tempo atual da prioridade menor e tempo menor
+    # para maior
     while len(list_espera) > 0:
         for i, vm in enumerate(list_espera):
             if i == 0:
                 menor = vm
-                # list_espera.remove(menor)
             else:
                 if vm.priority < menor.priority:
                     menor = vm
-                    
                 if vm.priority == menor.priority:
                     if vm.et < menor.et:
                         menor = vm
@@ -169,43 +181,49 @@ while len(cpu.vm_list) > 0:
         list_menor.append(menor)
         list_espera.remove(menor)
 
-    
-    # print("menor:", menor, menor.priority)
-    print("Lista espera:", list_menor)
+    # print("Lista espera:", list_menor)
     list_ordenada.extend(list_menor)
-    print("Lista ordenada:", list_ordenada)
+    # print("Lista ordenada:", list_ordenada)
     # print("Lista pending:", vm_pending_list)
+    # Reseta a lista de prioridade ordenada do tempo atual para não atrapalhar o próximo tempo
     list_menor = []
 
     while cont < len(list_ordenada):
         vm = list_ordenada[cont]
 
-        if len(vm_pending_list) > 0:
-            # como verifica todas uma por uma, pode quebrar a order quando a lista estiver ordenada em piroridade e outros
-            for i, vmp in enumerate(vm_pending_list):
-                if cpu.verificarEspaço(vmp):
-                    vmp.et += tempo
-                    cpu.alocarTarefa(vmp)
-                    vm_running_list.append(vmp)
-
-                    vm_pending_list.remove(vmp)
-                    # print(vmp)
-                    if vmp in list_ordenada:
-                        list_ordenada.remove(vmp)
-                    print("Entrou vm " + str(vmp.id) + " no tempo " + str(tempo))
-
         if cpu.verificarEspaço(vm):
             vm.et += tempo
             cpu.alocarTarefa(vm)
             vm_running_list.append(vm)
-
             list_ordenada.remove(vm)
             print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
-        else:
-            # print("vm na pending:", vm)
-            # print(list_ordenada)
-            if not vm in vm_pending_list:
-                vm_pending_list.append(vm)
+
+        # if len(vm_pending_list) > 0:
+        #     # como verifica todas uma por uma, pode quebrar a order quando a lista estiver ordenada em piroridade e outros
+        #     for i, vmp in enumerate(vm_pending_list):
+        #         if cpu.verificarEspaço(vmp):
+        #             vmp.et += tempo
+        #             cpu.alocarTarefa(vmp)
+        #             vm_running_list.append(vmp)
+
+        #             vm_pending_list.remove(vmp)
+        #             # print(vmp)
+        #             if vmp in list_ordenada:
+        #                 list_ordenada.remove(vmp)
+        #             print("Entrou vm " + str(vmp.id) + " no tempo " + str(tempo))
+
+        # if cpu.verificarEspaço(vm):
+        #     vm.et += tempo
+        #     cpu.alocarTarefa(vm)
+        #     vm_running_list.append(vm)
+
+        #     list_ordenada.remove(vm)
+        #     print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
+        # else:
+        #     # print("vm na pending:", vm)
+        #     # print(list_ordenada)
+        #     if not vm in vm_pending_list:
+        #         vm_pending_list.append(vm)
        
             
         # print(cpu.vm_list[cont])
@@ -268,14 +286,7 @@ while len(cpu.vm_list) > 0:
 
     # print(menor)
 
-    if len(vm_running_list) > 0:
-        for vmr in vm_running_list:
-            # !!!!! erro: tem que considerar o tempo atual também, por isso não funciona
-            if vmr.at < tempo and (vmr.et) == tempo:  #+ vmr.at
-                cpu.removerTarefa(vmr)
-                vm_running_list.remove(vmr)
-                print("Saiu vm " + str(vmr.id) + " no tempo " + str(tempo))
-    # print(cpu.lista_cheia)
+   
 
     
 
