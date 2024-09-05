@@ -98,6 +98,7 @@ tempo_max = 0 # tempo max first fit = 170 minutos aumentar de 5min em 5 min por 
 ciclo = 0
 rodada = 0
 cont = 0
+quantum = 20
 vm_running_list = []
 vm_pending_list = []
 list_espera = []
@@ -131,13 +132,11 @@ cpu.receberLista(vm_list)
 # cpu.info()
     
 while len(cpu.vm_list) > 0:
-# while tempo < 300:
-# while rodada < 30:
     print(" ")
     print("===  ===  ===  ")
     print("Ciclo:", ciclo, "|", tempo, "min.")
 
-
+    # Verificia se há alguma tarefa em execução e quando irá sair
     if len(vm_running_list) > 0:
         for vmr in vm_running_list:
             # !!!!! erro: tem que considerar o tempo atual também, por isso não funciona
@@ -145,20 +144,21 @@ while len(cpu.vm_list) > 0:
                 cpu.removerTarefa(vmr)
                 vm_running_list.remove(vmr)
                 print("Saiu vm " + str(vmr.id) + " no tempo " + str(tempo))
-    # print(cpu.lista_cheia)
-    
-    # tempo = 20
+
+            # print(vmr, vmr.et + quantum, vmr.et, "quantum excedido")
+            if tempo + quantum <= (vmr.et):
+                print(vmr, vmr.et + quantum, vmr.et, "quantum excedido")
+
+
     # Pega todas as vms que entram no tempo atual
     while cont < len(cpu.vm_list):
         vm = cpu.vm_list[cont]
-        # print(vm)
+
         if vm.at == tempo:
             list_espera.append(vm)
-            
-        # print(list_espera)
         cont += 1
+
     cont = 0
-    
     menor = 0
     list_menor = []
     
@@ -188,6 +188,7 @@ while len(cpu.vm_list) > 0:
     # Reseta a lista de prioridade ordenada do tempo atual para não atrapalhar o próximo tempo
     list_menor = []
 
+    # Verifica e aloca tarefas
     while cont < len(list_ordenada):
         vm = list_ordenada[cont]
 
@@ -197,39 +198,17 @@ while len(cpu.vm_list) > 0:
             vm_running_list.append(vm)
             list_ordenada.remove(vm)
             print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
-
-        # if len(vm_pending_list) > 0:
-        #     # como verifica todas uma por uma, pode quebrar a order quando a lista estiver ordenada em piroridade e outros
-        #     for i, vmp in enumerate(vm_pending_list):
-        #         if cpu.verificarEspaço(vmp):
-        #             vmp.et += tempo
-        #             cpu.alocarTarefa(vmp)
-        #             vm_running_list.append(vmp)
-
-        #             vm_pending_list.remove(vmp)
-        #             # print(vmp)
-        #             if vmp in list_ordenada:
-        #                 list_ordenada.remove(vmp)
-        #             print("Entrou vm " + str(vmp.id) + " no tempo " + str(tempo))
-
-        # if cpu.verificarEspaço(vm):
-        #     vm.et += tempo
-        #     cpu.alocarTarefa(vm)
-        #     vm_running_list.append(vm)
-
-        #     list_ordenada.remove(vm)
-        #     print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
-        # else:
-        #     # print("vm na pending:", vm)
-        #     # print(list_ordenada)
-        #     if not vm in vm_pending_list:
-        #         vm_pending_list.append(vm)
-       
-            
-        # print(cpu.vm_list[cont])
-        # print(vm_running_list)
         cont += 1
     cont = 0
+
+
+    cpu.info()
+    tempo += 5
+    ciclo += 1
+
+
+
+
 
 
     
@@ -286,26 +265,7 @@ while len(cpu.vm_list) > 0:
 
     # print(menor)
 
-   
-
     
-
-    cpu.info()
-    tempo += 5
-    ciclo += 1
-    # print("Rodada: " + str(rodada))
-    # for vm in vm_running_list:
-    # print(vm_running_list)
-    rodada += 1
-
-
-
-
-
-
-
-
-
 
 
 
