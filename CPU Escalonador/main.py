@@ -97,7 +97,6 @@ tempo_max = 0 # tempo max first fit = 170 minutos aumentar de 5min em 5 min por 
 ciclo = 0
 rodada = 0
 cont = 0
-vm_list = []
 vm_running_list = []
 vm_pending_list = []
 list_espera = []
@@ -118,7 +117,7 @@ vm9 = VM(9, 4 , 10, 20, 2)
 vm10 = VM(10, 1, 35, 30, 3)
 
 # vm_list.append(vm1).append(vm2).append(vm3).append(vm4).append(vm5).append(vm6).append(vm7).append(vm8).append(vm9).append(vm10)
-vm_list.extend([vm1, vm2, vm3, vm4, vm5, vm6, vm7, vm8, vm9, vm10])
+vm_list = [vm1, vm2, vm3, vm4, vm5, vm6, vm7, vm8, vm9, vm10]
 cpu.receberLista(vm_list)
     
 # cpu.info()
@@ -131,18 +130,56 @@ cpu.receberLista(vm_list)
     
 # while len(cpu.vm_list) > 0:
 # while tempo < 300:
-while rodada < 12:
+while rodada < 1:
     print(" ")
     print("===  ===  ===  ")
     print("Ciclo: ", ciclo, ", ", tempo, "min.")
+    
+    tempo = 20
+    while cont < len(cpu.vm_list):
+        vm = cpu.vm_list[cont]
+        # print(vm)
+        if vm.at == tempo:
+            list_espera.append(vm)
+            
+        # print(list_espera)
+        cont += 1
+    cont = 0
+    
+    menor = 0
+    list_menor = []
+    
+    for i in list_espera:
+        print(i, i.priority, i.et)
+        
+    while len(list_espera) > 0:
+        for i, vm in enumerate(list_espera):
+            if i == 0:
+                menor = vm
+                # list_espera.remove(menor)
+            else:
+                if vm.priority < menor.priority:
+                    menor = vm
+                    
+                if vm.priority == menor.priority:
+                    if vm.et < menor.et:
+                        menor = vm
+            
+        list_menor.append(menor)
+        list_espera.remove(menor)
 
+        
+    # print("menor:", menor, menor.priority)
+    print(list_menor)
     # while rodada < 5:
     # futuramente, comparar tempo estimado caso tempo de chegada e prioridade sejam iguais
     while cont < len(cpu.vm_list):
+        pass
         vm = cpu.vm_list[cont]
         # print(vm)
         # print(cpu.vm_list)
         # print(vm_pending_list)
+        
         
         # print("antes ", cpu.lista_cheia)
             # print("depois ", cpu.lista_cheia)
@@ -176,16 +213,16 @@ while rodada < 12:
         cont += 1
     cont = 0
 
-    menor = 0
+    # menor = 0
     
-    for i, vm in enumerate(list_espera):
-        if i == 0:
-            menor = vm
-        else:
-            if vm.priority < menor.priority:
-                menor = vm
+    # for i, vm in enumerate(list_espera):
+    #     if i == 0:
+    #         menor = vm
+    #     else:
+    #         if vm.priority < menor.priority:
+    #             menor = vm
 
-    print(menor)
+    # print(menor)
 
     if len(vm_running_list) > 0:
         for vmr in vm_running_list:
