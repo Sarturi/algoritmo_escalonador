@@ -98,7 +98,6 @@ tempo_max = 0 # tempo max first fit = 170 minutos aumentar de 5min em 5 min por 
 ciclo = 0
 rodada = 0
 cont = 0
-quantum = 20
 vm_running_list = []
 vm_pending_list = []
 list_espera = []
@@ -144,10 +143,6 @@ while len(cpu.vm_list) > 0:
                 cpu.removerTarefa(vmr)
                 vm_running_list.remove(vmr)
                 print("Saiu vm " + str(vmr.id) + " no tempo " + str(tempo))
-
-            # print(vmr, vmr.et + quantum, vmr.et, "quantum excedido")
-            if tempo + quantum <= (vmr.et):
-                print(vmr, vmr.et + quantum, vmr.et, "quantum excedido")
 
 
     # Pega todas as vms que entram no tempo atual
