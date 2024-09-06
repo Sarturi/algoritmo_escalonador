@@ -102,11 +102,12 @@ vm_running_list = []
 vm_pending_list = []
 list_espera = []
 list_ordenada = []
+list_ordenada_temp = []
+ordenada_change = False
 
-# def main():
 cpu = CPU(1, Status.OCIOSO.value)
 
-#Lista de VM's n
+#Lista de VM's
 vm1 = VM(1, 4, 35, 40, 3)
 vm2 = VM(2, 2, 40, 45, 1)
 vm3 = VM(3, 4, 30, 45, 1)
@@ -118,7 +119,6 @@ vm8 = VM(8, 4, 20, 30, 1)
 vm9 = VM(9, 4 , 10, 20, 2) ##
 vm10 = VM(10, 1, 35, 30, 3)##
 
-# vm_list.append(vm1).append(vm2).append(vm3).append(vm4).append(vm5).append(vm6).append(vm7).append(vm8).append(vm9).append(vm10)
 vm_list = [vm1, vm2, vm3, vm4, vm5, vm6, vm7, vm8, vm9, vm10]
 cpu.receberLista(vm_list)
     
@@ -158,11 +158,17 @@ while len(cpu.vm_list) > 0:
     menor = 0
     list_menor = []
     
-    # for i in list_espera:
-    #     print(i, i.priority, i.et, i.at)
+    for i in list_espera:
+        print(i, i.priority, i.et, i.at)
         
     # ordena as vms do tempo atual da prioridade menor e tempo menor
     # para maior
+
+    # if len(list_ordenada) > 0:
+    #     for vmo in list_ordenada:
+    #         if vmo not in list_espera:
+    #             list_espera.append(vmo)
+
     while len(list_espera) > 0:
         for i, vm in enumerate(list_espera):
             if i == 0:
@@ -173,18 +179,48 @@ while len(cpu.vm_list) > 0:
                 if vm.priority == menor.priority:
                     if vm.et < menor.et:
                         menor = vm
-            
+        
+        ordenada_change = True
         list_menor.append(menor)
-        cont += 1
+        # cont += 1
         list_espera.remove(menor)
     cont = 0
 
-    # print("Lista espera:", list_menor)
-    list_ordenada.extend(list_menor)
-    # print("Lista ordenada:", list_ordenada)
-    # print("Lista pending:", vm_pending_list)
+    print("Lista espera:", list_menor)
+
+    # Coloca as vms ordenadas da lista temporária para a 'permanente'
+    # list_ordenada.extend(list_menor)
+    
+    
+    if ordenada_change:
+        list_ordenada.extend(list_menor)
+
+        nova_list_ordenada = []
+        menor = 0
+
+        while len(list_ordenada) > 0:
+            for i, vmn in enumerate(list_ordenada):
+                if i == 0:
+                    menor = vmn
+                else:
+                    if vmn.priority < menor.priority:
+                        menor = vmn
+                    if vmn.priority == menor.priority:
+                        if vmn.et < menor.et:
+                            menor = vmn
+            
+            nova_list_ordenada.append(menor)
+            list_ordenada.remove(menor)
+
+        list_ordenada.extend(nova_list_ordenada) 
+        ordenada_change = False
+    
+    print("Lista ordenada:", list_ordenada)
+
+    
     # Reseta a lista de prioridade ordenada do tempo atual para não atrapalhar o próximo tempo
     list_menor = []
+    cont = 0
 
     # Verifica e aloca tarefas
     while cont < len(list_ordenada):
