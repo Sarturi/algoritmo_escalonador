@@ -150,7 +150,8 @@ while len(cpu.vm_list) > 0:
         vm = cpu.vm_list[cont]
 
         if vm.at == tempo:
-            list_espera.append(vm)
+            if vm not in list_espera:
+                list_espera.append(vm)
         cont += 1
 
     cont = 0
@@ -174,7 +175,9 @@ while len(cpu.vm_list) > 0:
                         menor = vm
             
         list_menor.append(menor)
+        cont += 1
         list_espera.remove(menor)
+    cont = 0
 
     # print("Lista espera:", list_menor)
     list_ordenada.extend(list_menor)
