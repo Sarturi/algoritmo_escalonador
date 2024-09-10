@@ -191,7 +191,6 @@ while len(cpu.vm_list) > 0:
     # Coloca as vms ordenadas da lista temporária para a 'permanente'
     # list_ordenada.extend(list_menor)
     
-    
     if ordenada_change:
         list_ordenada.extend(list_menor)
 
@@ -222,7 +221,11 @@ while len(cpu.vm_list) > 0:
     list_menor = []
     cont = 0
 
-    # Verifica e aloca tarefas
+    
+# Verifica e aloca tarefas
+
+    # Versão 1: ignora a prioridade se tiver espaço livre
+
     while cont < len(list_ordenada):
         vm = list_ordenada[cont]
 
@@ -235,6 +238,17 @@ while len(cpu.vm_list) > 0:
         cont += 1
     cont = 0
 
+    # Versão 2: Não ignora a prioridade
+    
+    # if list_ordenada:
+    #     vm = list_ordenada[0]
+        
+    #     if cpu.verificarEspaço(vm):
+    #         vm.et += tempo
+    #         cpu.alocarTarefa(vm)
+    #         vm_running_list.append(vm)
+    #         list_ordenada.remove(vm)
+    #         print("Entrou vm " + str(vm.id) + " no tempo " + str(tempo))
 
     cpu.info()
     tempo += 5
